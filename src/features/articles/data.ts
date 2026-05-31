@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { asc, desc, eq } from "drizzle-orm";
 
 import { getDb } from "@/db/client";
-import { articles, quizzes, slides } from "@/db/schema";
+import { articles, quizzes, slides, type GenerationStatus } from "@/db/schema";
 import type { ArticleInput } from "@/features/articles/validation";
+import type { GeneratedQuizzes, GeneratedSlides } from "@/lib/ai/schemas";
 
 export type ArticleSummary = typeof articles.$inferSelect;
 
@@ -66,4 +67,62 @@ export async function updateArticle(id: string, input: ArticleInput) {
 
 export async function deleteArticle(id: string) {
   await getDb().delete(articles).where(eq(articles.id, id));
+}
+
+export async function setSlideStatus(id: string, status: GenerationStatus) {
+  await getDb()
+    .update(articles)
+    .set({ slideStatus: status, updatedAt: new Date() })
+    .where(eq(articles.id, id));
+}
+
+export async function setQuizStatus(id: string, status: GenerationStatus) {
+  await getDb()
+    .update(articles)
+    .set({ quizStatus: status, updatedAt: new Date() })
+    .where(eq(articles.id, id));
+}
+
+export async function replaceSlides(id: string, generated: GeneratedSlides) {
+  const db = getDb();
+
+  await db.transaction(async (tx) => {
+    await tx.delete(slides).where(eq(slides.articleId, id));
+    await tx.insert(slides).values(
+      generated.slides.map((slide, index) => ({
+        id: `slide_${randomUUID()}`,
+        articleId: id,
+        order: index + 1,
+        title: slide.title,
+        content: slide.content,
+      })),
+    );
+    await tx
+      .update(articles)
+      .set({ slideStatus: "generated", updatedAt: new Date() })
+      .where(eq(articles.id, id));
+  });
+}
+
+export async function replaceQuizzes(id: string, generated: GeneratedQuizzes) {
+  const db = getDb();
+
+  await db.transaction(async (tx) => {
+    await tx.delete(quizzes).where(eq(quizzes.articleId, id));
+    await tx.insert(quizzes).values(
+      generated.quizzes.map((quiz, index) => ({
+        id: `quiz_${randomUUID()}`,
+        articleId: id,
+        order: index + 1,
+        question: quiz.question,
+        choices: quiz.choices,
+        correctChoiceIndex: quiz.correctChoiceIndex,
+        explanation: quiz.explanation,
+      })),
+    );
+    await tx
+      .update(articles)
+      .set({ quizStatus: "generated", updatedAt: new Date() })
+      .where(eq(articles.id, id));
+  });
 }

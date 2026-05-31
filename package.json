@@ -12,7 +12,10 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.80",
+    "@ai-sdk/openai": "^3.0.67",
     "@neondatabase/serverless": "^1.1.0",
+    "ai": "^6.0.193",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^0.468.0",
     "next": "^16.0.0",

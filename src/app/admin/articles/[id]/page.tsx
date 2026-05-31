@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 import {
   deleteArticleAction,
+  generateQuizzesAction,
+  generateSlidesAction,
   updateArticleAction,
 } from "@/features/articles/actions";
 import { ArticleForm } from "@/features/articles/article-form";
@@ -41,6 +43,8 @@ export default async function ArticleDetailPage({
 
   const updateAction = updateArticleAction.bind(null, article.id);
   const deleteAction = deleteArticleAction.bind(null, article.id);
+  const generateSlides = generateSlidesAction.bind(null, article.id);
+  const generateQuizzes = generateQuizzesAction.bind(null, article.id);
 
   return (
     <div className="stack">
@@ -73,6 +77,86 @@ export default async function ArticleDetailPage({
               {article.sourceUrl ?? "None"}
             </p>
           </div>
+        </div>
+      </Surface>
+
+      <Surface spacious>
+        <div className="cluster">
+          <div className="stack-tight">
+            <p className="eyebrow">Generation</p>
+            <h2 className="heading-lg">AI learning content</h2>
+            <p className="body-muted">
+              Generate saved slide and quiz content from this article snapshot.
+            </p>
+          </div>
+          <div className="button-row">
+            <form action={generateSlides}>
+              <Button type="submit" disabled={article.slideStatus === "generating"}>
+                Generate slides
+              </Button>
+            </form>
+            <form action={generateQuizzes}>
+              <Button
+                variant="secondary"
+                type="submit"
+                disabled={article.quizStatus === "generating"}
+              >
+                Generate quizzes
+              </Button>
+            </form>
+          </div>
+        </div>
+      </Surface>
+
+      <Surface spacious>
+        <div className="stack">
+          <div className="stack-tight">
+            <p className="eyebrow">Generated slides</p>
+            <h2 className="heading-lg">Summary deck</h2>
+          </div>
+          {article.slides.length === 0 ? (
+            <p className="body-muted">No slides generated yet.</p>
+          ) : (
+            <div className="generated-list">
+              {article.slides.map((slide) => (
+                <article className="generated-item" key={slide.id}>
+                  <p className="eyebrow">Slide {slide.order}</p>
+                  <h3>{slide.title}</h3>
+                  <p>{slide.content}</p>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </Surface>
+
+      <Surface spacious>
+        <div className="stack">
+          <div className="stack-tight">
+            <p className="eyebrow">Generated quizzes</p>
+            <h2 className="heading-lg">Knowledge check</h2>
+          </div>
+          {article.quizzes.length === 0 ? (
+            <p className="body-muted">No quizzes generated yet.</p>
+          ) : (
+            <div className="generated-list">
+              {article.quizzes.map((quiz) => (
+                <article className="generated-item" key={quiz.id}>
+                  <p className="eyebrow">Question {quiz.order}</p>
+                  <h3>{quiz.question}</h3>
+                  <ol className="choice-list">
+                    {quiz.choices.map((choice, index) => (
+                      <li key={choice}>
+                        {choice}
+                        {index === quiz.correctChoiceIndex ? " (Correct)" : ""}
+                      </li>
+                    ))}
+                  </ol>
+                  <p>{quiz.explanation}</p>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </Surface>
 
