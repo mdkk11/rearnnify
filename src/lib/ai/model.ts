@@ -15,16 +15,20 @@ function getProvider(): AiProvider {
 
 export function getLanguageModel() {
   const provider = getProvider();
-  const modelName =
-    process.env.AI_MODEL ??
-    (provider === "google" ? "gemini-2.5-flash" : "openai/gpt-5.4");
+  const defaultModel =
+    provider === "gateway"
+      ? "openai/gpt-5.4"
+      : provider === "google"
+        ? "gemini-2.5-flash"
+        : "gpt-5.4";
+  const modelName = process.env.AI_MODEL ?? defaultModel;
 
   if (provider === "openai") {
-    return openai(modelName);
+    return openai(modelName.replace(/^openai\//, ""));
   }
 
   if (provider === "google") {
-    return google(modelName);
+    return google(modelName.replace(/^google\//, ""));
   }
 
   return modelName;

@@ -1,6 +1,7 @@
 /* global document, window, URL, fetch */
 (function () {
   var STYLE_ID = "learnnify-widget-style";
+  var FONTS_ID = "learnnify-widget-fonts";
 
   function getServiceOrigin() {
     var script = document.currentScript;
@@ -13,6 +14,15 @@
   }
 
   function injectStyle() {
+    if (!document.getElementById(FONTS_ID)) {
+      var fonts = document.createElement("link");
+      fonts.id = FONTS_ID;
+      fonts.href =
+        "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap";
+      fonts.rel = "stylesheet";
+      document.head.appendChild(fonts);
+    }
+
     if (document.getElementById(STYLE_ID)) {
       return;
     }
@@ -34,6 +44,7 @@
       ".learnnify-choice-correct{border-color:#1c1f24}",
       ".learnnify-choice-incorrect{opacity:.65}",
       ".learnnify-muted{color:#6c727a}",
+      ".learnnify-feedback{min-height:1.55em}",
     ].join("");
     document.head.appendChild(style);
   }
@@ -122,7 +133,9 @@
 
     quizzes.forEach(function (quiz) {
       var card = createElement("article", "learnnify-card");
-      var feedback = createElement("p", "learnnify-muted");
+      var choiceButtons = [];
+      var feedback = createElement("p", "learnnify-muted learnnify-feedback");
+      feedback.setAttribute("aria-live", "polite");
       card.appendChild(createElement("p", "learnnify-eyebrow", "Question " + quiz.order));
       card.appendChild(createElement("h3", null, quiz.question));
 
@@ -131,11 +144,18 @@
         button.type = "button";
         button.addEventListener("click", function () {
           var correct = index === quiz.correctChoiceIndex;
+          choiceButtons.forEach(function (choiceButton, choiceIndex) {
+            choiceButton.disabled = true;
+            if (choiceIndex === quiz.correctChoiceIndex) {
+              choiceButton.className += " learnnify-choice-correct";
+            }
+          });
           button.className += correct
             ? " learnnify-choice-correct"
             : " learnnify-choice-incorrect";
           feedback.textContent = (correct ? "Correct. " : "Incorrect. ") + quiz.explanation;
         });
+        choiceButtons.push(button);
         card.appendChild(button);
       });
 
