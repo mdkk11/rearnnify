@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { requireAdminPage } from "@/lib/admin-auth";
 
 type AdminLayoutProps = {
   children: ReactNode;
 };
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
-  return <AdminShell>{children}</AdminShell>;
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const session = await requireAdminPage();
+
+  return <AdminShell email={session.user?.email ?? "Admin"}>{children}</AdminShell>;
 }

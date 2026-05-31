@@ -306,7 +306,14 @@ select {
 .admin-topbar {
   align-items: center;
   display: flex;
+  gap: var(--space-4);
   justify-content: space-between;
+}
+
+.admin-session {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
 }
 
 .empty-state {

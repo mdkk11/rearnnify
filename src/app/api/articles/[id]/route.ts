@@ -6,12 +6,16 @@ import {
   updateArticle,
 } from "@/features/articles/data";
 import { articleInputSchema } from "@/features/articles/validation";
+import { requireAdminApi } from "@/lib/admin-auth";
 
 type ArticleRouteContext = {
   params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, context: ArticleRouteContext) {
+  const unauthorized = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   const { id } = await context.params;
 
   try {
@@ -31,6 +35,9 @@ export async function GET(_request: Request, context: ArticleRouteContext) {
 }
 
 export async function PUT(request: Request, context: ArticleRouteContext) {
+  const unauthorized = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   const { id } = await context.params;
   const parsed = articleInputSchema.safeParse(await request.json());
 
@@ -58,6 +65,9 @@ export async function PUT(request: Request, context: ArticleRouteContext) {
 }
 
 export async function DELETE(_request: Request, context: ArticleRouteContext) {
+  const unauthorized = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   const { id } = await context.params;
 
   try {

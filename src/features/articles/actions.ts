@@ -9,6 +9,7 @@ import {
   updateArticle,
 } from "@/features/articles/data";
 import { articleInputSchema } from "@/features/articles/validation";
+import { requireAdmin } from "@/lib/admin-auth";
 
 function parseArticleForm(formData: FormData) {
   return articleInputSchema.parse({
@@ -19,12 +20,14 @@ function parseArticleForm(formData: FormData) {
 }
 
 export async function createArticleAction(formData: FormData) {
+  await requireAdmin();
   const article = await createArticle(parseArticleForm(formData));
   revalidatePath("/admin/articles");
   redirect(`/admin/articles/${article.id}`);
 }
 
 export async function updateArticleAction(id: string, formData: FormData) {
+  await requireAdmin();
   await updateArticle(id, parseArticleForm(formData));
   revalidatePath("/admin/articles");
   revalidatePath(`/admin/articles/${id}`);
@@ -32,6 +35,7 @@ export async function updateArticleAction(id: string, formData: FormData) {
 }
 
 export async function deleteArticleAction(id: string) {
+  await requireAdmin();
   await deleteArticle(id);
   revalidatePath("/admin/articles");
   redirect("/admin/articles");
