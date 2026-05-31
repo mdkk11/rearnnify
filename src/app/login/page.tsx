@@ -1,9 +1,17 @@
 import { LogIn } from "lucide-react";
+import { redirect } from "next/navigation";
 
+import { auth, isAdminSession, signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+
+  if (isAdminSession(session)) {
+    redirect("/admin/articles");
+  }
+
   return (
     <main className="page-shell centered-page">
       <Surface className="login-panel" spacious>
@@ -16,10 +24,17 @@ export default function LoginPage() {
               workspace.
             </p>
           </div>
-          <Button>
-            <LogIn size={16} strokeWidth={1.5} />
-            Googleでログイン
-          </Button>
+          <form
+            action={async () => {
+              "use server";
+              await signIn("google", { redirectTo: "/admin/articles" });
+            }}
+          >
+            <Button type="submit">
+              <LogIn size={16} strokeWidth={1.5} />
+              Googleでログイン
+            </Button>
+          </form>
         </div>
       </Surface>
     </main>
