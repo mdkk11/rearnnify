@@ -6,6 +6,23 @@ type EmbedRouteContext = {
   params: Promise<{ id: string }>;
 };
 
+const embedHeaders = {
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Origin": "*",
+  "Cache-Control": "no-store",
+};
+
+function embedJson(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...embedHeaders,
+      ...init?.headers,
+    },
+  });
+}
+
 export async function GET(_request: Request, context: EmbedRouteContext) {
   const { id } = await context.params;
 
@@ -13,12 +30,12 @@ export async function GET(_request: Request, context: EmbedRouteContext) {
     const article = await getPublicEmbedArticle(id);
 
     if (!article) {
-      return NextResponse.json({ message: "Article not found." }, { status: 404 });
+      return embedJson({ message: "Article not found." }, { status: 404 });
     }
 
-    return NextResponse.json(article);
+    return embedJson(article);
   } catch (error) {
-    return NextResponse.json(
+    return embedJson(
       {
         message:
           error instanceof Error
@@ -28,4 +45,11 @@ export async function GET(_request: Request, context: EmbedRouteContext) {
       { status: 500 },
     );
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    headers: embedHeaders,
+    status: 204,
+  });
 }
