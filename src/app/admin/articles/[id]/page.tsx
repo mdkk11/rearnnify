@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { Surface } from "@/components/ui/surface";
 import {
   deleteArticleAction,
@@ -45,6 +46,9 @@ export default async function ArticleDetailPage({
   const deleteAction = deleteArticleAction.bind(null, article.id);
   const generateSlides = generateSlidesAction.bind(null, article.id);
   const generateQuizzes = generateQuizzesAction.bind(null, article.id);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://your-service.com";
+  const embedCode = `<div data-learning-widget data-article-id="${article.id}"></div>
+<script src="${appUrl}/embed.js"></script>`;
 
   return (
     <div className="stack">
@@ -127,6 +131,22 @@ export default async function ArticleDetailPage({
               ))}
             </div>
           )}
+        </div>
+      </Surface>
+
+      <Surface spacious>
+        <div className="stack">
+          <div className="cluster">
+            <div className="stack-tight">
+              <p className="eyebrow">Embed code</p>
+              <h2 className="heading-lg">Blog widget</h2>
+              <p className="body-muted">
+                Paste this snippet into the matching blog article page.
+              </p>
+            </div>
+            <CopyButton value={embedCode} />
+          </div>
+          <pre className="code-block">{embedCode}</pre>
         </div>
       </Surface>
 

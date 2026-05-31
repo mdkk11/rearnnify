@@ -126,3 +126,34 @@ export async function replaceQuizzes(id: string, generated: GeneratedQuizzes) {
       .where(eq(articles.id, id));
   });
 }
+
+export async function getPublicEmbedArticle(id: string) {
+  const article = await getArticleDetail(id);
+
+  if (!article) {
+    return null;
+  }
+
+  return {
+    articleId: article.id,
+    title: article.title,
+    slides:
+      article.slideStatus === "generated"
+        ? article.slides.map((slide) => ({
+            order: slide.order,
+            title: slide.title,
+            content: slide.content,
+          }))
+        : [],
+    quizzes:
+      article.quizStatus === "generated"
+        ? article.quizzes.map((quiz) => ({
+            order: quiz.order,
+            question: quiz.question,
+            choices: quiz.choices,
+            correctChoiceIndex: quiz.correctChoiceIndex,
+            explanation: quiz.explanation,
+          }))
+        : [],
+  };
+}
